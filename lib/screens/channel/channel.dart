@@ -293,11 +293,6 @@ class _VideoChatState extends State<VideoChat>
   Widget build(BuildContext context) {
     final settingsStore = _chatTabsStore.settingsStore;
 
-    _scheduleSystemUiModeSync(
-      immersive:
-          context.isLandscape && !settingsStore.landscapeForceVerticalChat,
-    );
-
     final player = GestureDetector(
       onLongPress: _videoStore.handleToggleOverlay,
       child: Video(key: _videoKey, videoStore: _videoStore),
@@ -400,6 +395,11 @@ class _VideoChatState extends State<VideoChat>
 
     final videoChat = Observer(
       builder: (context) {
+        _scheduleSystemUiModeSync(
+          immersive:
+              context.isLandscape && !settingsStore.landscapeForceVerticalChat,
+        );
+
         // Build a blurred AppBar when in chat-only mode (no video)
         PreferredSizeWidget? chatOnlyBlurredAppBar;
         if (!settingsStore.showVideo) {

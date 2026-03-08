@@ -139,21 +139,23 @@ class VideoOverlay extends StatelessWidget {
       ),
     );
 
-    final fullScreenButton = Tooltip(
-      message: videoStore.settingsStore.fullScreen
-          ? 'Exit fullscreen mode'
-          : 'Enter fullscreen mode',
-      preferBelow: false,
-      child: IconButton(
-        icon: Icon(
-          videoStore.settingsStore.fullScreen
-              ? Icons.fullscreen_exit_rounded
-              : Icons.fullscreen_rounded,
-          color: surfaceColor,
-          shadows: kOverlayShadow,
+    final fullScreenButton = Observer(
+      builder: (_) => Tooltip(
+        message: videoStore.settingsStore.fullScreen
+            ? 'Exit fullscreen mode'
+            : 'Enter fullscreen mode',
+        preferBelow: false,
+        child: IconButton(
+          icon: Icon(
+            videoStore.settingsStore.fullScreen
+                ? Icons.fullscreen_exit_rounded
+                : Icons.fullscreen_rounded,
+            color: surfaceColor,
+            shadows: kOverlayShadow,
+          ),
+          onPressed: () => videoStore.settingsStore.fullScreen =
+              !videoStore.settingsStore.fullScreen,
         ),
-        onPressed: () => videoStore.settingsStore.fullScreen =
-            !videoStore.settingsStore.fullScreen,
       ),
     );
 
