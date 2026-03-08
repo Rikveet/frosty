@@ -7,7 +7,6 @@ import 'package:frosty/screens/channel/chat/chat.dart';
 import 'package:frosty/screens/channel/chat/stores/chat_tabs_store.dart';
 import 'package:frosty/screens/channel/chat/widgets/add_chat_dialog.dart';
 import 'package:frosty/utils.dart';
-import 'package:frosty/widgets/frosty_dialog.dart';
 import 'package:frosty/widgets/profile_picture.dart';
 
 /// Widget that displays multiple chat tabs with a tab bar.
@@ -185,35 +184,6 @@ class ChatTabs extends StatelessWidget {
     );
   }
 
-  Future<void> _confirmRemoveTab(
-    BuildContext context,
-    int index,
-    String displayName,
-  ) async {
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (context) => FrostyDialog(
-        title: 'Remove $displayName',
-        message: "Are you sure you want to remove $displayName's chat tab?",
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Cancel'),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            child: const Text('Remove'),
-          ),
-        ],
-      ),
-    );
-
-    if (confirmed == true) {
-      HapticFeedback.lightImpact();
-      chatTabsStore.removeTab(index);
-    }
-  }
-
   Widget _buildMergeToggle(BuildContext context) {
     final isMerged = chatTabsStore.mergedMode;
     return IconButton.filledTonal(
@@ -283,7 +253,10 @@ class ChatTabs extends StatelessWidget {
             'Remove',
             style: TextStyle(color: Theme.of(context).colorScheme.error),
           ),
-          onPressed: () => _confirmRemoveTab(context, index, displayName),
+          onPressed: () {
+            HapticFeedback.lightImpact();
+            chatTabsStore.removeTab(index);
+          },
         ),
       ],
       builder: (context, controller, child) {
