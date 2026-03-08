@@ -875,7 +875,9 @@ abstract class ChatStoreBase with Store {
   @action
   Future<void> connectToChat({bool isReconnect = false}) async {
     // Fetch assets first so they're available for all messages
-    getAssets();
+    getAssets().catchError(
+      (e) => debugPrint('Failed to fetch chat assets: $e'),
+    );
 
     // Cancel existing listener to prevent duplicate message processing
     _channelListener?.cancel();
@@ -1301,12 +1303,16 @@ abstract class ChatStoreBase with Store {
 
   @action
   Future<void> getRecentMessage() async {
-    final recentMessages = await twitchApi.getRecentMessages(
-      userLogin: channelName,
-    );
+    try {
+      final recentMessages = await twitchApi.getRecentMessages(
+        userLogin: channelName,
+      );
 
-    for (final message in recentMessages) {
-      _handleIRCData(message);
+      for (final message in recentMessages) {
+        _handleIRCData(message);
+      }
+    } catch (e) {
+      debugPrint('Failed to fetch recent messages: $e');
     }
   }
 
