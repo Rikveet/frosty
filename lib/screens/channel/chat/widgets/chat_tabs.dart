@@ -262,26 +262,11 @@ class ChatTabs extends StatelessWidget {
       );
     }
 
-    final borderColor =
-        Theme.of(context).colorScheme.outlineVariant.withValues(alpha: 0.5);
-
     return MenuAnchor(
-      style: MenuStyle(
-        padding: const WidgetStatePropertyAll(EdgeInsets.symmetric(vertical: 4)),
-        shape: WidgetStatePropertyAll(
-          RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-            side: BorderSide(color: borderColor),
-          ),
-        ),
-      ),
       menuChildren: [
         if (isActivated)
           MenuItemButton(
             leadingIcon: const Icon(Icons.power_off_rounded, size: 18),
-            style: MenuItemButton.styleFrom(
-              visualDensity: VisualDensity.compact,
-            ),
             child: const Text('Disconnect'),
             onPressed: () {
               HapticFeedback.lightImpact();
@@ -293,9 +278,6 @@ class ChatTabs extends StatelessWidget {
             Icons.delete_outline_rounded,
             size: 18,
             color: Theme.of(context).colorScheme.error,
-          ),
-          style: MenuItemButton.styleFrom(
-            visualDensity: VisualDensity.compact,
           ),
           child: Text(
             'Remove',
