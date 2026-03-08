@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 
 /// Common type aliases to reduce repetition
 typedef JsonMap = Map<String, dynamic>;
@@ -157,29 +158,35 @@ abstract class BaseApiClient {
 
   /// Converts DioException to appropriate ApiException subtype
   ApiException _handleError(DioException error) {
-    switch (error.type) {
-      case DioExceptionType.connectionTimeout:
-      case DioExceptionType.sendTimeout:
-      case DioExceptionType.receiveTimeout:
-        return TimeoutException(_getTimeoutMessage(error.type));
+    final exception = switch (error.type) {
+      DioExceptionType.connectionTimeout ||
+      DioExceptionType.sendTimeout ||
+      DioExceptionType.receiveTimeout =>
+        TimeoutException(_getTimeoutMessage(error.type)),
+      DioExceptionType.connectionError => NetworkException(
+        'No internet connection. Please check your network.',
+      ),
+      DioExceptionType.badResponse => _handleHttpError(error),
+      DioExceptionType.cancel => ApiException('Request was cancelled'),
+      DioExceptionType.badCertificate =>
+        ApiException('Security certificate error'),
+      DioExceptionType.unknown =>
+        ApiException(error.message ?? 'An unexpected error occurred'),
+    };
 
-      case DioExceptionType.connectionError:
-        return NetworkException(
-          'No internet connection. Please check your network.',
-        );
-
-      case DioExceptionType.badResponse:
-        return _handleHttpError(error);
-
-      case DioExceptionType.cancel:
-        return ApiException('Request was cancelled');
-
-      case DioExceptionType.badCertificate:
-        return ApiException('Security certificate error');
-
-      case DioExceptionType.unknown:
-        return ApiException(error.message ?? 'An unexpected error occurred');
+    // Record server errors and unexpected failures to Crashlytics.
+    // Skip timeouts, network errors (normal offline conditions), 401s, and cancellations.
+    if (exception is ServerException ||
+        error.type == DioExceptionType.unknown ||
+        error.type == DioExceptionType.badCertificate) {
+      FirebaseCrashlytics.instance.recordError(
+        exception,
+        error.stackTrace,
+        reason: '${error.requestOptions.method} ${error.requestOptions.uri}',
+      );
     }
+
+    return exception;
   }
 
   /// Gets specific timeout message based on timeout type

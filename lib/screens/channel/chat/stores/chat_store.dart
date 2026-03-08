@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:frosty/apis/twitch_api.dart';
@@ -862,7 +863,14 @@ abstract class ChatStoreBase with Store {
           );
         }
       },
-      onError: (error) => debugPrint('7TV events error: ${error.toString()}'),
+      onError: (error) {
+        debugPrint('7TV events error: ${error.toString()}');
+        FirebaseCrashlytics.instance.recordError(
+          error,
+          StackTrace.current,
+          reason: '7TV WebSocket error, channel=$channelName',
+        );
+      },
       onDone: () {
         _clearPendingDelayedCallbacks(clearChat: false);
         debugPrint('7TV events done');
@@ -874,6 +882,8 @@ abstract class ChatStoreBase with Store {
 
   @action
   Future<void> connectToChat({bool isReconnect = false}) async {
+    FirebaseCrashlytics.instance.setCustomKey('channel', channelName);
+
     // Fetch assets first so they're available for all messages
     getAssets().catchError(
       (e) => debugPrint('Failed to fetch chat assets: $e'),
@@ -907,7 +917,14 @@ abstract class ChatStoreBase with Store {
           });
         }
       },
-      onError: (error) => debugPrint('Chat error: ${error.toString()}'),
+      onError: (error) {
+        debugPrint('Chat error: ${error.toString()}');
+        FirebaseCrashlytics.instance.recordError(
+          error,
+          StackTrace.current,
+          reason: 'IRC WebSocket error, channel=$channelName',
+        );
+      },
       onDone: () async {
         _clearPendingDelayedCallbacks(clearSevenTV: false);
 
@@ -924,6 +941,9 @@ abstract class ChatStoreBase with Store {
         }
 
         if (_retries >= _maxRetries) {
+          FirebaseCrashlytics.instance.log(
+            'WebSocket reconnection failed after $_maxRetries attempts, channel=$channelName',
+          );
           // Remove the reconnect message before showing final disconnect notice
           if (_reconnectMessage != null) {
             final index = _messages.indexOf(_reconnectMessage!);
@@ -949,6 +969,9 @@ abstract class ChatStoreBase with Store {
 
         // Increment the retry count.
         _retries++;
+        FirebaseCrashlytics.instance.log(
+          'WebSocket reconnecting: attempt $_retries/$_maxRetries, channel=$channelName',
+        );
 
         // Start exponential backoff only after first failed attempt (capped at 8s).
         // First retry is immediate to catch brief network hiccups.

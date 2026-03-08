@@ -17,6 +17,8 @@ import 'package:simple_icons/simple_icons.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class Settings extends StatelessWidget {
+  static const routeName = 'Settings';
+
   final SettingsStore settingsStore;
 
   const Settings({super.key, required this.settingsStore});

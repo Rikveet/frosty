@@ -168,6 +168,7 @@ class StreamCard extends StatelessWidget {
                   ? () => Navigator.push(
                       context,
                       MaterialPageRoute(
+                        settings: const RouteSettings(name: CategoryStreams.routeName),
                         builder: (context) =>
                             CategoryStreams(categoryId: streamInfo.gameId),
                       ),
@@ -203,6 +204,7 @@ class StreamCard extends StatelessWidget {
       onTap: () => Navigator.push(
         context,
         MaterialPageRoute(
+          settings: const RouteSettings(name: VideoChat.routeName),
           builder: (context) => VideoChat(
             userId: streamInfo.userId,
             userName: streamInfo.userName,

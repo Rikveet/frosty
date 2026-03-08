@@ -21,6 +21,8 @@ import 'package:simple_pip_mode/pip_widget.dart';
 
 /// Creates a widget that shows the video stream (if live) and chat of the given user.
 class VideoChat extends StatefulWidget {
+  static const routeName = 'VideoChat';
+
   final String userId;
   final String userName;
   final String userLogin;

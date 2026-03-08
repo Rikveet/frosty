@@ -44,7 +44,10 @@ class _HomeState extends State<Home> {
 
       Navigator.push(
         context,
-        MaterialPageRoute(builder: (context) => const ReleaseNotes()),
+        MaterialPageRoute(
+          settings: const RouteSettings(name: ReleaseNotes.routeName),
+          builder: (context) => const ReleaseNotes(),
+        ),
       ).then((_) => prefs.setString('last_shown_version', currentVersion));
     }
   }
@@ -121,6 +124,7 @@ class _HomeState extends State<Home> {
                     onPressed: () => Navigator.push(
                       context,
                       MaterialPageRoute(
+                        settings: const RouteSettings(name: Settings.routeName),
                         builder: (context) => Settings(
                           settingsStore: context.read<SettingsStore>(),
                         ),

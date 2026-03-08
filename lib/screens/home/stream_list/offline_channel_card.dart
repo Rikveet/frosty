@@ -57,6 +57,7 @@ class OfflineChannelCard extends StatelessWidget {
       onTap: () => Navigator.push(
         context,
         MaterialPageRoute(
+          settings: const RouteSettings(name: VideoChat.routeName),
           builder: (context) => VideoChat(
             userId: channelInfo.broadcasterId,
             userName: channelInfo.broadcasterName,

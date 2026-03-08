@@ -13,6 +13,8 @@ import 'package:provider/provider.dart';
 
 /// A widget that displays a list of streams under the provided [categoryId].
 class CategoryStreams extends StatefulWidget {
+  static const routeName = 'CategoryStreams';
+
   /// The category id, used for fetching the relevant streams in the [ListStore].
   final String categoryId;
 

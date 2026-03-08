@@ -8,6 +8,8 @@ import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
 class ReleaseNotes extends StatefulWidget {
+  static const routeName = 'ReleaseNotes';
+
   const ReleaseNotes({super.key});
 
   @override

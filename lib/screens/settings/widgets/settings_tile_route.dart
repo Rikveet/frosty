@@ -24,6 +24,7 @@ class SettingsTileRoute extends StatelessWidget {
       trailing: const Icon(Icons.chevron_right_rounded),
       onTap: () => Navigator.of(context).push(
         MaterialPageRoute(
+          settings: RouteSettings(name: title),
           builder: (context) => useScaffold
               ? _BlurredSettingsPage(title: title, child: child)
               : child,
