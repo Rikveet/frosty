@@ -2,11 +2,10 @@
 //
 // Usage: dart run scripts/get_twitch_token.dart
 //
-// Reads CLIENT_ID and SECRET from .env, env vars, or prompts interactively.
+// Reads CLIENT_ID from .env, env vars, or prompts interactively.
 // Opens the Twitch OAuth page in your browser — after you authorize,
 // paste the redirect URL back here and the token is printed.
 // Then long-press the Anonymous account tile in the app to log in.
-import 'dart:convert';
 import 'dart:io';
 
 const scopes =
@@ -18,20 +17,18 @@ void main() async {
   final env = _loadEnvFile();
 
   final clientId = _resolve('CLIENT_ID', env);
-  final secret = _resolve('SECRET', env);
 
-  if (clientId == null || secret == null) {
-    stderr.writeln('Error: CLIENT_ID and SECRET are both required.');
-    stderr.writeln('Add them to .env or export them in your shell.');
+  if (clientId == null) {
+    stderr.writeln('Error: CLIENT_ID is required.');
+    stderr.writeln('Add it to .env or export it in your shell.');
     exit(1);
   }
 
   final authorizeUrl = 'https://id.twitch.tv/oauth2/authorize'
       '?client_id=$clientId'
       '&redirect_uri=$redirectUri'
-      '&response_type=code'
-      '&scope=$scopes'
-      '&force_verify=true';
+      '&response_type=token'
+      '&scope=$scopes';
 
   stdout.writeln('Opening Twitch authorization in your browser...');
   await _openUrl(authorizeUrl);
@@ -40,7 +37,9 @@ void main() async {
   stdout.writeln(
     'After authorizing, copy the full URL from the address bar and paste it here:',
   );
-  stdout.writeln('(it will look like https://twitch.tv/login?code=...)');
+  stdout.writeln(
+    '(it will look like https://twitch.tv/login#access_token=...)',
+  );
   stdout.writeln();
   stdout.write('> ');
 
@@ -50,58 +49,26 @@ void main() async {
     exit(1);
   }
 
-  final uri = Uri.tryParse(redirectUrl);
-  final code = uri?.queryParameters['code'];
+  // The token is in the URL fragment (#access_token=...).
+  // Replace # with ? so Uri can parse it as query parameters.
+  final uri = Uri.tryParse(redirectUrl.replaceFirst('#', '?'));
+  final token = uri?.queryParameters['access_token'];
 
-  if (code == null || code.isEmpty) {
+  if (token == null || token.isEmpty) {
     stderr.writeln();
-    stderr.writeln('Error: could not extract code from that URL.');
+    stderr.writeln('Error: could not extract token from that URL.');
     stderr.writeln(
-      'Make sure you pasted the full URL including the ?code=... part.',
+      'Make sure you pasted the full URL including the #access_token=... part.',
     );
     exit(1);
   }
 
   stdout.writeln();
-  stdout.writeln('Exchanging code for token...');
-
-  final client = HttpClient();
-  try {
-    final request = await client.postUrl(
-      Uri.parse('https://id.twitch.tv/oauth2/token'),
-    );
-    request.headers.contentType = ContentType(
-      'application',
-      'x-www-form-urlencoded',
-    );
-    request.write(
-      'client_id=$clientId'
-      '&client_secret=$secret'
-      '&code=$code'
-      '&grant_type=authorization_code'
-      '&redirect_uri=$redirectUri',
-    );
-
-    final response = await request.close();
-    final body = await response.transform(utf8.decoder).join();
-    final json = jsonDecode(body) as Map<String, dynamic>;
-
-    final token = json['access_token'] as String?;
-    if (token == null || token.isEmpty) {
-      stderr.writeln('Error: token exchange failed.');
-      stderr.writeln(body);
-      exit(1);
-    }
-
-    stdout.writeln();
-    stdout.writeln('Token: $token');
-    stdout.writeln();
-    stdout.writeln(
-      'Now in the emulator, long-press the Anonymous account tile to log in.',
-    );
-  } finally {
-    client.close();
-  }
+  stdout.writeln('Token: $token');
+  stdout.writeln();
+  stdout.writeln(
+    'Now in the emulator, long-press the Anonymous account tile to log in.',
+  );
 }
 
 /// Reads a value from env vars first, then .env file, then prompts.
