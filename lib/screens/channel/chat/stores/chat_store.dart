@@ -570,6 +570,7 @@ abstract class ChatStoreBase with Store {
 
                 // Show notification with Twitch's rejection message
                 if (parsedIRCMessage.message != null) {
+                  HapticFeedback.heavyImpact();
                   updateNotification(parsedIRCMessage.message!);
                 }
               }
@@ -1138,6 +1139,7 @@ abstract class ChatStoreBase with Store {
 
     // Prevent double-sending while waiting for server acknowledgment
     if (_isWaitingForAck) {
+      HapticFeedback.mediumImpact();
       updateNotification('Please wait, sending previous message...');
       return;
     }
@@ -1173,6 +1175,7 @@ abstract class ChatStoreBase with Store {
       if (_isWaitingForAck) {
         _isWaitingForAck = false;
         toSend = null;
+        HapticFeedback.heavyImpact();
         updateNotification('Message may not have been sent. Please try again.');
       }
     });
@@ -1246,9 +1249,6 @@ abstract class ChatStoreBase with Store {
     // Cancel the previous notification to prevent the notification from phasing in and out
     // when copying messages repeatedly.
     _notificationTimer?.cancel();
-
-    // Provide subtle haptic feedback when notification is triggered
-    HapticFeedback.lightImpact();
 
     // Set the new notification message and create a new timer that will dismiss it after 3 seconds.
     _notification = notificationMessage;

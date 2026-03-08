@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:frosty/utils/context_extensions.dart';
 
 class ExpandableSectionHeader extends StatelessWidget {
@@ -24,7 +25,12 @@ class ExpandableSectionHeader extends StatelessWidget {
     final isLandscape = context.isLandscape;
 
     return InkWell(
-      onTap: onToggle,
+      onTap: onToggle != null
+          ? () {
+              HapticFeedback.selectionClick();
+              onToggle!();
+            }
+          : null,
       child: Padding(
         padding:
             padding ??

@@ -71,7 +71,7 @@ class _OtherSettingsState extends State<OtherSettings> {
           leading: const Icon(Icons.delete_outline_rounded),
           title: const Text('Clear image cache'),
           onTap: () async {
-            HapticFeedback.mediumImpact();
+            HapticFeedback.lightImpact();
 
             await CustomCacheManager.instance.emptyCache();
             await CustomCacheManager.removeOrphanedCacheFiles();

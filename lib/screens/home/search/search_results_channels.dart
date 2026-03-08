@@ -128,7 +128,7 @@ class _SearchResultsChannelsState extends State<SearchResultsChannels> {
                       ),
                     ),
                     onLongPress: () {
-                      HapticFeedback.lightImpact();
+                      HapticFeedback.mediumImpact();
 
                       showModalBottomSheetWithProperFocus(
                         context: context,

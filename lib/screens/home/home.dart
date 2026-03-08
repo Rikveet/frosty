@@ -207,7 +207,12 @@ class _HomeState extends State<Home> {
                   ),
                 ],
                 selectedIndex: _homeStore.selectedIndex,
-                onDestinationSelected: _homeStore.handleTap,
+                onDestinationSelected: (index) {
+                  if (index != _homeStore.selectedIndex) {
+                    HapticFeedback.selectionClick();
+                  }
+                  _homeStore.handleTap(index);
+                },
               ),
             ),
           ),
