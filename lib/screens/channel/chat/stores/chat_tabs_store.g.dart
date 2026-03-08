@@ -256,6 +256,18 @@ mixin _$ChatTabsStore on ChatTabsStoreBase, Store {
   }
 
   @override
+  void deactivateTab(int index) {
+    final _$actionInfo = _$ChatTabsStoreBaseActionController.startAction(
+      name: 'ChatTabsStoreBase.deactivateTab',
+    );
+    try {
+      return super.deactivateTab(index);
+    } finally {
+      _$ChatTabsStoreBaseActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
   bool removeTab(int index) {
     final _$actionInfo = _$ChatTabsStoreBaseActionController.startAction(
       name: 'ChatTabsStoreBase.removeTab',
