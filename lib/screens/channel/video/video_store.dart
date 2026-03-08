@@ -315,6 +315,20 @@ abstract class VideoStoreBase with Store {
           // Start tracker if either setting is now enabled
           // The init() method is idempotent - won't double-start if already running
           await _listenOnLatencyChanges();
+
+          // If autoSync was just enabled and we already have a cached latency
+          // value (e.g. from showLatency tracking), apply it immediately instead
+          // of waiting for the next tracker cycle (up to 60s).
+          if (autoSync && _latency != null) {
+            final numericPart = _latency!.replaceAll(
+              RegExp(r'[^0-9.]'),
+              '',
+            );
+            final latencyAsDouble = double.tryParse(numericPart);
+            if (latencyAsDouble != null) {
+              settingsStore.syncedChatDelay = latencyAsDouble;
+            }
+          }
         } else {
           // Stop tracker if both settings are now disabled
           try {
