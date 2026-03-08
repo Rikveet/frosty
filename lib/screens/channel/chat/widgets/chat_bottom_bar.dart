@@ -19,10 +19,14 @@ class ChatBottomBar extends StatelessWidget {
   /// Passes this to ChatDetails to show "Add chat" option.
   final VoidCallback onAddChat;
 
+  /// When set, indicates merged mode — shown in hint text (e.g., "Chat in xQc").
+  final String? channelDisplayName;
+
   const ChatBottomBar({
     super.key,
     required this.chatStore,
     required this.onAddChat,
+    this.channelDisplayName,
   });
 
   @override
@@ -301,9 +305,15 @@ class ChatBottomBar extends StatelessWidget {
                                     : isWaitingForAck
                                     ? 'Sending...'
                                     : chatStore.replyingToMessage != null
-                                    ? 'Reply'
+                                    ? channelDisplayName != null
+                                        ? 'Reply in ${channelDisplayName!}'
+                                        : 'Reply'
                                     : hasChatDelay
-                                    ? 'Chat (${effectiveChatDelay.toInt()}s delay)'
+                                    ? channelDisplayName != null
+                                        ? 'Chat in ${channelDisplayName!} (${effectiveChatDelay.toInt()}s delay)'
+                                        : 'Chat (${effectiveChatDelay.toInt()}s delay)'
+                                    : channelDisplayName != null
+                                    ? 'Chat in ${channelDisplayName!}'
                                     : 'Chat',
                               ),
                               controller: chatStore.textController,

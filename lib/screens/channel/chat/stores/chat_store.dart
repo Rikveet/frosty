@@ -1203,6 +1203,10 @@ abstract class ChatStoreBase with Store {
             replyingToMessage!.message ?? '';
       }
 
+      // Ensure a timestamp so merged-mode sorting works correctly.
+      userChatMessage.tags['tmi-sent-ts'] ??=
+          '${DateTime.now().millisecondsSinceEpoch}';
+
       toSend = userChatMessage;
     }
   }
