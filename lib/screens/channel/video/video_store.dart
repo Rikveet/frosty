@@ -38,6 +38,12 @@ abstract class VideoStoreBase with Store {
 
   var _firstTimeSettingQuality = true;
 
+  /// Whether [initVideo] should run on the next [onPageFinished].
+  ///
+  /// Dart-controlled instead of JS-side (`window._injected`) to avoid race
+  /// conditions when `loadRequest` fires before the previous page fully loads.
+  var _needsInit = true;
+
   /// The video web view params used for enabling auto play.
   late final PlatformWebViewControllerCreationParams _videoWebViewParams;
 
@@ -126,18 +132,8 @@ abstract class VideoStoreBase with Store {
           NavigationDelegate(
             onPageFinished: (url) async {
               if (url != videoUrl) return;
-              // Safe evaluation of JavaScript boolean result
-              final result = await videoWebViewController
-                  .runJavaScriptReturningResult(
-                    'window._injected ? true : false',
-                  );
-              final injected = result is bool
-                  ? result
-                  : (result.toString().toLowerCase() == 'true');
-              if (injected) return;
-              await videoWebViewController.runJavaScript(
-                'window._injected = true;',
-              );
+              if (!_needsInit) return;
+              _needsInit = false;
               await initVideo();
               _acceptContentWarning();
             },
@@ -810,6 +806,9 @@ abstract class VideoStoreBase with Store {
                 videoElement.textTracks[0].mode = "hidden";
               }
             }
+
+            // Explicitly attempt autoplay in case the player loaded paused
+            try { await videoElement.play(); } catch (e) {}
           });
         ''');
         if (settingsStore.showOverlay) {
@@ -991,27 +990,24 @@ abstract class VideoStoreBase with Store {
   }
 
   /// Refreshes the stream webview and updates the stream info.
-  ///
-  /// Performs a hard refresh by loading about:blank first to completely clear
-  /// the webview state, then immediately reloads the video URL. This is more
-  /// reliable than a soft reload when the webview is sluggish.
   @action
   Future<void> handleRefresh() async {
     HapticFeedback.lightImpact();
     _paused = true;
     _firstTimeSettingQuality = true;
     _isInPipMode = false;
+    _latency = null;
+    _availableStreamQualities = [];
 
-    // Stop latency tracker immediately to free up JS main thread for refresh
+    // Signal that initVideo() should run on the next onPageFinished
+    _needsInit = true;
+
     try {
       videoWebViewController.runJavaScript('window._latencyTracker?.stop()');
     } catch (e) {
       // Ignore - may not exist yet
     }
 
-    // Hard refresh: clear everything by loading blank page first
-    await videoWebViewController.loadRequest(Uri.parse('about:blank'));
-    // Then immediately load the video URL for a fresh start
     await videoWebViewController.loadRequest(Uri.parse(videoUrl));
 
     updateStreamInfo();
