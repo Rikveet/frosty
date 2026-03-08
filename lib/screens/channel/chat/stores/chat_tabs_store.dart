@@ -531,6 +531,39 @@ abstract class ChatTabsStoreBase with Store {
     return true;
   }
 
+  /// Deactivates a tab by disposing its ChatStore without removing the tab.
+  /// The tab stays in the tab bar but appears dimmed. Tapping reactivates it.
+  @action
+  void deactivateTab(int index) {
+    if (index < 0 || index >= _tabs.length) return;
+    final tab = _tabs[index];
+    if (tab.isPrimary) return;
+    if (tab.chatStore == null) return;
+
+    // If this is the active tab, switch to primary
+    if (index == activeTabIndex) {
+      activeTabIndex = 0;
+    }
+
+    // Clean up merged mode state
+    if (mergedMode) {
+      _tabChannelProfiles.remove(tab.channelId);
+      _mergedSnapshot = null;
+    }
+
+    // Dispose the ChatStore (closes IRC connection)
+    tab.chatStore!.dispose();
+    tab.chatStore = null;
+
+    // Exit merged mode if fewer than 2 tabs remain activated
+    if (mergedMode && _tabs.where((t) => t.chatStore != null).length < 2) {
+      mergedMode = false;
+      _mergedRenderTimer?.cancel();
+      _mergedRenderTimer = null;
+      _mergedRenderedMessages = [];
+    }
+  }
+
   /// Removes the tab at the given index.
   /// Returns true if removed, false if primary tab or invalid index.
   @action

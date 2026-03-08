@@ -245,32 +245,93 @@ class ChatTabs extends StatelessWidget {
 
     final avatar = ProfilePicture(userLogin: tabInfo.channelLogin, radius: 12);
 
-    return InputChip(
-      avatar: isActivated ? avatar : Opacity(opacity: 0.5, child: avatar),
-      label: Text(
-        displayName,
-        style: isActivated
-            ? null
-            : TextStyle(
-                color: Theme.of(
-                  context,
-                ).textTheme.bodyMedium?.color?.withValues(alpha: 0.5),
-              ),
+    if (tabInfo.isPrimary) {
+      return InputChip(
+        avatar: avatar,
+        label: Text(displayName),
+        selected: isActive,
+        showCheckmark: false,
+        visualDensity: VisualDensity.compact,
+        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+        onPressed: () {
+          if (!isActive) {
+            HapticFeedback.selectionClick();
+            chatTabsStore.setActiveTab(index);
+          }
+        },
+      );
+    }
+
+    final borderColor =
+        Theme.of(context).colorScheme.outlineVariant.withValues(alpha: 0.5);
+
+    return MenuAnchor(
+      style: MenuStyle(
+        padding: const WidgetStatePropertyAll(EdgeInsets.symmetric(vertical: 4)),
+        shape: WidgetStatePropertyAll(
+          RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+            side: BorderSide(color: borderColor),
+          ),
+        ),
       ),
-      selected: isActive,
-      showCheckmark: false,
-      visualDensity: VisualDensity.compact,
-      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-      onPressed: () {
-        if (!isActive) {
-          HapticFeedback.selectionClick();
-          chatTabsStore.setActiveTab(index);
-        }
+      menuChildren: [
+        if (isActivated)
+          MenuItemButton(
+            leadingIcon: const Icon(Icons.power_off_rounded, size: 18),
+            style: MenuItemButton.styleFrom(
+              visualDensity: VisualDensity.compact,
+            ),
+            child: const Text('Disconnect'),
+            onPressed: () {
+              HapticFeedback.lightImpact();
+              chatTabsStore.deactivateTab(index);
+            },
+          ),
+        MenuItemButton(
+          leadingIcon: Icon(
+            Icons.delete_outline_rounded,
+            size: 18,
+            color: Theme.of(context).colorScheme.error,
+          ),
+          style: MenuItemButton.styleFrom(
+            visualDensity: VisualDensity.compact,
+          ),
+          child: Text(
+            'Remove',
+            style: TextStyle(color: Theme.of(context).colorScheme.error),
+          ),
+          onPressed: () => _confirmRemoveTab(context, index, displayName),
+        ),
+      ],
+      builder: (context, controller, child) {
+        return InputChip(
+          avatar:
+              isActivated ? avatar : Opacity(opacity: 0.5, child: avatar),
+          label: Text(
+            displayName,
+            style: isActivated
+                ? null
+                : TextStyle(
+                    color: Theme.of(
+                      context,
+                    ).textTheme.bodyMedium?.color?.withValues(alpha: 0.5),
+                  ),
+          ),
+          selected: isActive,
+          showCheckmark: false,
+          visualDensity: VisualDensity.compact,
+          materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+          onPressed: () {
+            if (!isActive) {
+              HapticFeedback.selectionClick();
+              chatTabsStore.setActiveTab(index);
+            }
+          },
+          onDeleted: () => controller.open(),
+          deleteButtonTooltipMessage: 'Tab options',
+        );
       },
-      onDeleted: tabInfo.isPrimary
-          ? null
-          : () => _confirmRemoveTab(context, index, displayName),
-      deleteButtonTooltipMessage: 'Close chat',
     );
   }
 }
