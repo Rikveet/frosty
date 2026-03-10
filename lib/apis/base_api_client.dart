@@ -179,11 +179,15 @@ abstract class BaseApiClient {
     if (exception is ServerException ||
         error.type == DioExceptionType.unknown ||
         error.type == DioExceptionType.badCertificate) {
-      FirebaseCrashlytics.instance.recordError(
-        exception,
-        error.stackTrace,
-        reason: '${error.requestOptions.method} ${error.requestOptions.uri}',
-      );
+      try {
+        FirebaseCrashlytics.instance.recordError(
+          exception,
+          error.stackTrace,
+          reason: '${error.requestOptions.method} ${error.requestOptions.uri}',
+        );
+      } catch (_) {
+        // Firebase may not be initialized (e.g., in tests).
+      }
     }
 
     return exception;
