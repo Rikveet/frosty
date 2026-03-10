@@ -22,8 +22,6 @@ class ExpandableSectionHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isLandscape = context.isLandscape;
-
     return InkWell(
       onTap: onToggle != null
           ? () {
@@ -35,9 +33,9 @@ class ExpandableSectionHeader extends StatelessWidget {
         padding:
             padding ??
             EdgeInsets.fromLTRB(
-              isLandscape ? MediaQuery.of(context).padding.left : 16,
+              16 + MediaQuery.of(context).padding.left,
               0,
-              isLandscape ? MediaQuery.of(context).padding.right : 16,
+              16 + MediaQuery.of(context).padding.right,
               8,
             ),
         child: Column(

@@ -77,11 +77,14 @@ class Settings extends StatelessWidget {
       body: Stack(
         children: [
           // Main scrollable content
-          FrostyScrollbar(
-            padding: EdgeInsets.only(
-              top: MediaQuery.of(context).padding.top + kToolbarHeight,
-            ),
-            child: CustomScrollView(
+          SafeArea(
+            top: false,
+            bottom: false,
+            child: FrostyScrollbar(
+              padding: EdgeInsets.only(
+                top: MediaQuery.of(context).padding.top + kToolbarHeight,
+              ),
+              child: CustomScrollView(
               slivers: [
                 SliverPadding(
                   padding: EdgeInsets.only(
@@ -200,6 +203,7 @@ class Settings extends StatelessWidget {
                 ),
               ],
             ),
+          ),
           ),
           // Blurred app bar overlay
           Positioned(

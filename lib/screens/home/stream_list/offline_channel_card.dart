@@ -81,9 +81,11 @@ class OfflineChannelCard extends StatelessWidget {
         );
       },
       child: Padding(
-        padding: EdgeInsets.symmetric(
-          horizontal: 16 + MediaQuery.of(context).padding.left,
-          vertical: 8,
+        padding: EdgeInsets.fromLTRB(
+          16 + MediaQuery.of(context).padding.left,
+          8,
+          16 + MediaQuery.of(context).padding.right,
+          8,
         ),
         child: Row(
           spacing: 12,
