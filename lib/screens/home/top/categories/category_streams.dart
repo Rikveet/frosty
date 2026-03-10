@@ -63,18 +63,7 @@ class _CategoryStreamsState extends State<CategoryStreams> {
                 left: MediaQuery.of(context).padding.left,
                 right: MediaQuery.of(context).padding.right,
               ),
-              child: Container(
-                decoration: BoxDecoration(
-                  border: Border(
-                    bottom: BorderSide(
-                      color: theme.colorScheme.outlineVariant.withValues(
-                        alpha: 0.3,
-                      ),
-                      width: 0.5,
-                    ),
-                  ),
-                ),
-                child: Column(
+              child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     // App bar section
@@ -144,7 +133,6 @@ class _CategoryStreamsState extends State<CategoryStreams> {
                     ),
                   ],
                 ),
-              ),
             ),
           ),
         ],
